@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>بصيرة — Basira</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070d;--surface:#0f0f1a;--s2:#161625;--s3:#1d1d30;
+  --a:#7c6af7;--a2:#f76a8a;--a3:#4ade80;
+  --text:#eeeef8;--muted:#6b6b8a;--border:rgba(124,106,247,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:font-family .2s}
+body.en{font-family:'Inter',sans-serif}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 70% 55% at 15% 15%,rgba(124,106,247,.1) 0%,transparent 65%),
+             radial-gradient(ellipse 55% 45% at 85% 85%,rgba(247,106,138,.07) 0%,transparent 65%)}
+
+.screen{display:none;position:relative;z-index:1;min-height:100vh}
+.screen.active{display:flex}
+
+/* ── LANG TOGGLE ── */
+.lang-btn{
+  position:fixed;top:1rem;left:1rem;z-index:100;
+  background:var(--surface);border:1px solid var(--border);border-radius:50px;
+  padding:.35rem .85rem;cursor:pointer;font-size:.75rem;font-weight:700;
+  color:var(--a);transition:all .22s ease;display:flex;align-items:center;gap:.35rem;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
+.lang-btn:hover{border-color:var(--a);background:var(--s2);}
+
+/* ── WELCOME ── */
+#W{flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center}
+.logo{font-size:3.8rem;font-weight:900;letter-spacing:-3px;
+  background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:fd .7s ease both;margin-bottom:.3rem}
+.w-sub{color:var(--muted);font-size:.93rem;animation:fd .7s .08s ease both;margin-bottom:1rem}
+.pills{display:flex;gap:.45rem;justify-content:center;flex-wrap:wrap;animation:fd .7s .14s ease both;margin-bottom:2.2rem}
+.pill{border-radius:50px;padding:.24rem .78rem;font-size:.7rem;font-weight:600}
+.pill.g{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:var(--a3)}
+.pill.p{background:rgba(124,106,247,.1);border:1px solid var(--border);color:var(--a)}
+.pill.r{background:rgba(247,106,138,.1);border:1px solid rgba(247,106,138,.2);color:var(--a2)}
+.w-q{font-size:1.1rem;font-weight:700;margin-bottom:1.2rem;animation:fu .7s .22s ease both}
+.mcards{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;animation:fu .7s .3s ease both}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.6rem 1.2rem;
+  width:190px;cursor:pointer;transition:all .3s;text-align:center;position:relative;overflow:hidden}
+.mc::after{content:'';position:absolute;inset:0;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none}
+.mc.c::after{background:radial-gradient(ellipse at 50% 0%,rgba(124,106,247,.18) 0%,transparent 70%)}
+.mc.v::after{background:radial-gradient(ellipse at 50% 0%,rgba(247,106,138,.18) 0%,transparent 70%)}
+.mc:hover,.mc:active{transform:translateY(-6px);box-shadow:0 12px 30px rgba(124,106,247,.18)}
+.mc:hover::after,.mc:active::after{opacity:1}
+.mc.v:hover{box-shadow:0 12px 30px rgba(247,106,138,.15)}
+.mc-ico{font-size:2.4rem;margin-bottom:.7rem;display:block;animation:float 3.5s ease-in-out infinite}
+.mc.v .mc-ico{animation-delay:.4s}
+.mc h3{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.mc p{font-size:.74rem;color:var(--muted);line-height:1.5}
+.mc-tag{display:inline-block;margin-top:.65rem;padding:.18rem .6rem;border-radius:50px;font-size:.67rem;font-weight:600}
+.mc.c .mc-tag{background:rgba(124,106,247,.15);color:var(--a)}
+.mc.v .mc-tag{background:rgba(247,106,138,.15);color:var(--a2)}
+
+/* ── APP ── */
+#A{flex-direction:column}
+.wrap{max-width:800px;margin:0 auto;padding:1rem 1.1rem;width:100%}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
+.btn-back{background:var(--surface);border:1px solid var(--border);border-radius:50px;
+  padding:.4rem .9rem;color:var(--muted);cursor:pointer;font-family:inherit;font-size:.8rem;transition:all .2s}
+.btn-back:hover{color:var(--text);border-color:var(--a)}
+.app-title{font-size:1.15rem;font-weight:700;
+  background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.15rem;margin-bottom:.8rem;box-shadow:0 4px 24px rgba(0,0,0,.35)}
+
+/* ── VIEWPORT ── */
+.vp{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;margin-bottom:1rem}
+#vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none}
+#glc{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vp-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.65rem;color:var(--muted);z-index:5}
+.vp-ico{font-size:2.6rem;animation:pulse 2.2s ease-in-out infinite}
+.hud-tr{position:absolute;top:9px;right:9px;display:flex;flex-direction:column;gap:.3rem;z-index:10}
+.hud-bl{position:absolute;bottom:9px;left:9px;display:flex;gap:.3rem;z-index:10}
+.chip{background:rgba(5,5,12,.82);backdrop-filter:blur(10px);border-radius:50px;padding:.18rem .65rem;font-size:.68rem;white-space:nowrap}
+.chip.a{border:1px solid rgba(124,106,247,.35);color:var(--a)}
+.chip.g{border:1px solid rgba(74,222,128,.3);color:var(--a3);font-family:monospace}
+.chip.w{border:1px solid rgba(255,255,255,.15);color:var(--text)}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:.4rem;margin-bottom:.9rem}
+.tab{padding:.38rem .85rem;border-radius:50px;border:1px solid var(--border);background:var(--s2);
+  color:var(--muted);cursor:pointer;font-family:inherit;font-size:.79rem;font-weight:500;transition:all .2s}
+.tab.active{background:linear-gradient(135deg,var(--a),#5540d0);border-color:transparent;color:#fff}
+
+/* ── COLOR GRID ── */
+.slabel{font-size:.78rem;color:var(--muted);font-weight:500;margin-bottom:.6rem}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.42rem;margin-bottom:.9rem}
+.cg-btn{padding:.55rem .35rem;border-radius:10px;border:1px solid var(--border);background:var(--s2);
+  color:var(--text);cursor:pointer;font-family:inherit;font-size:.76rem;font-weight:500;transition:all .2s;text-align:center}
+.cg-btn:hover,.cg-btn:active{border-color:var(--a);transform:translateY(-2px)}
+.cg-btn.active{background:linear-gradient(135deg,rgba(124,106,247,.22),rgba(124,106,247,.06));
+  border-color:var(--a);color:#fff;box-shadow:0 0 12px rgba(124,106,247,.18)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-left:3px;vertical-align:middle}
+body.en .dot{margin-left:0;margin-right:3px}
+
+/* ── SEVERITY ── */
+.sev-row{display:flex;align-items:center;gap:.7rem;background:var(--s2);border:1px solid var(--border);
+  border-radius:11px;padding:.68rem .9rem;margin-bottom:.9rem}
+.sev-lbl{font-size:.77rem;color:var(--muted);white-space:nowrap;min-width:75px}
+.sev-sl{flex:1;accent-color:var(--a);cursor:pointer;height:16px}
+.sev-val{font-size:.8rem;font-weight:700;min-width:34px;text-align:center}
+
+/* ── SCI PANEL ── */
+.sci{background:linear-gradient(135deg,rgba(124,106,247,.07),rgba(124,106,247,.02));
+  border:1px solid rgba(124,106,247,.2);border-radius:12px;padding:.85rem;margin-bottom:.9rem}
+.sci h5{font-size:.74rem;color:var(--a);font-weight:700;margin-bottom:.35rem}
+.sci p{font-size:.77rem;color:var(--muted);line-height:1.65}
+.sci small{font-size:.67rem;opacity:.58;font-style:italic;display:block;margin-top:.25rem}
+
+/* ── INFO ROW ── */
+.irow{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
+.ic{background:var(--s2);border:1px solid var(--border);border-radius:11px;padding:.72rem}
+.ic h5{font-size:.7rem;color:var(--muted);margin-bottom:.2rem}
+.ic p{font-size:.78rem;line-height:1.4}
+.sbar{height:2px;background:var(--s3);border-radius:2px;margin-top:.3rem;overflow:hidden}
+.sfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--a),var(--a2));transition:width .5s ease}
+
+/* ── PRESCRIPTION ── */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.85rem}
+.ec{background:var(--s2);border:1px solid var(--border);border-radius:13px;padding:1rem}
+.ec h4{font-size:.87rem;font-weight:700;margin-bottom:.75rem}
+.ec.r h4{color:var(--a)}.ec.l h4{color:var(--a2)}
+.ig{margin-bottom:.62rem}
+.ig label{display:block;font-size:.71rem;color:var(--muted);margin-bottom:.18rem}
+.ig input[type=range]{width:100%;accent-color:var(--a);cursor:pointer;height:16px}
+.iv{display:flex;justify-content:space-between;align-items:center;margin-top:.1rem}
+.iv span{font-size:.7rem;color:var(--muted)}.iv strong{font-size:.85rem}
+
+/* ── PSF ── */
+.psf{background:linear-gradient(135deg,rgba(247,106,138,.07),rgba(247,106,138,.02));
+  border:1px solid rgba(247,106,138,.2);border-radius:12px;padding:.85rem;margin-bottom:.85rem}
+.psf h5{font-size:.74rem;color:var(--a2);font-weight:700;margin-bottom:.3rem}
+.psf p{font-size:.77rem;color:var(--muted);line-height:1.6}
+
+/* ── UPLOAD ── */
+.ulbl{display:block;border:2px dashed rgba(124,106,247,.22);border-radius:12px;
+  padding:1.5rem;text-align:center;cursor:pointer;color:var(--muted);transition:all .2s;margin-bottom:.9rem;font-size:.82rem}
+.ulbl:hover{border-color:var(--a);background:rgba(124,106,247,.04)}
+
+/* ── ACTION BTN ── */
+.abtn{width:100%;padding:.78rem;border-radius:11px;border:none;
+  background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;
+  font-family:inherit;font-size:.94rem;font-weight:700;cursor:pointer;
+  transition:all .3s;box-shadow:0 4px 20px rgba(124,106,247,.3)}
+.abtn:hover,.abtn:active{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,106,247,.45)}
+
+/* ── ANIMATIONS ── */
+@keyframes fd{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.9;transform:scale(1.08)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+@media(max-width:600px){
+  .mcards{flex-direction:column;align-items:center}
+  .mc{width:100%;max-width:280px}
+  .pgrid,.irow{grid-template-columns:1fr}
+  .cg{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- Language Toggle -->
+<button class="lang-btn" id="langBtn" onclick="toggleLang()">
+  🌐 <span id="langLabel">EN</span>
+</button>
+
+<!-- WELCOME -->
+<div id="W" class="screen active">
+  <div class="logo">بَصيرة</div>
+  <div class="w-sub" data-ar="محاكي الرؤية الطبي العلمي" data-en="Scientific Medical Vision Simulator"></div>
+  <div class="pills">
+    <span class="pill g">⚡ WebGL · 60fps</span>
+    <span class="pill p">🔬 Machado 2009</span>
+    <span class="pill r">👁️ PSF Model</span>
+  </div>
+  <div class="w-q" data-ar="ماذا تريد محاكاته؟" data-en="What do you want to simulate?"></div>
+  <div class="mcards">
+    <div class="mc c" onclick="goApp('color')">
+      <span class="mc-ico">🎨</span>
+      <h3 data-ar="عمى الألوان" data-en="Color Blindness"></h3>
+      <p data-ar="Machado 2009 بالكاميرا المباشرة" data-en="Machado 2009 with live camera"></p>
+      <span class="mc-tag" data-ar="6 أنواع" data-en="6 Types"></span>
+    </div>
+    <div class="mc v" onclick="goApp('vision')">
+      <span class="mc-ico">👁️</span>
+      <h3 data-ar="ضعف النظر" data-en="Vision Impairment"></h3>
+      <p data-ar="PSF + Sphere + Cylinder" data-en="PSF + Sphere + Cylinder"></p>
+      <span class="mc-tag" data-ar="✨ فريد" data-en="✨ Unique"></span>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="A" class="screen">
+<div class="wrap">
+  <div class="topbar">
+    <button class="btn-back" onclick="goBack()" data-ar="← رجوع" data-en="← Back"></button>
+    <div class="app-title" id="appTitle">بَصيرة</div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="card">
+    <div class="vp">
+      <video id="vid" autoplay playsinline muted></video>
+      <canvas id="glc"></canvas>
+      <div class="vp-ph" id="ph">
+        <div class="vp-ico">👁️</div>
+        <span class="ph-text" style="font-size:.82rem" data-ar="اضغط لتشغيل الكاميرا" data-en="Press to start camera"></span>
+      </div>
+      <div class="hud-tr">
+        <div class="chip w" id="hLbl">—</div>
+        <div class="chip a" id="hAlgo" style="display:none">Machado 2009</div>
+        <div class="chip a" id="hSev" style="display:none"></div>
+      </div>
+      <div class="hud-bl">
+        <div class="chip g" id="hFps" style="display:none">— fps</div>
+        <div class="chip g" id="hGpu" style="display:none">⚡ GPU</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="setIM('camera',this)" data-ar="📷 كاميرا" data-en="📷 Camera"></button>
+      <button class="tab" onclick="setIM('image',this)" data-ar="🖼️ صورة" data-en="🖼️ Image"></button>
+    </div>
+    <div id="uploadSec" style="display:none">
+      <label class="ulbl" for="imgFile">
+        <div style="font-size:1.7rem;margin-bottom:.35rem">🖼️</div>
+        <span data-ar="اسحب صورة أو اضغط للرفع" data-en="Drag an image or click to upload"></span>
+        <input type="file" id="imgFile" accept="image/*" style="display:none" onchange="onImgLoad(event)">
+      </label>
+    </div>
+
+    <!-- COLOR controls -->
+    <div id="CC">
+      <div class="slabel" data-ar="🎨 نوع ضعف البصر اللوني" data-en="🎨 Color Vision Deficiency Type"></div>
+      <div class="cg">
+        <button class="cg-btn active" onclick="setCT('protanopia',this)">
+          <span class="dot" style="background:#ef4444"></span><span data-ar="بروتانوبيا" data-en="Protanopia"></span>
+        </button>
+        <button class="cg-btn" onclick="setCT('deuteranopia',this)">
+          <span class="dot" style="background:#22c55e"></span><span data-ar="دوترانوبيا" data-en="Deuteranopia"></span>
+        </button>
+        <button class="cg-btn" onclick="setCT('tritanopia',this)">
+          <span class="dot" style="background:#3b82f6"></span><span data-ar="ترايتانوبيا" data-en="Tritanopia"></span>
+        </button>
+        <button class="cg-btn" onclick="setCT('protanomaly',this)">
+          <span class="dot" style="background:#f97316"></span><span data-ar="بروتانومالي" data-en="Protanomaly"></span>
+        </button>
+        <button class="cg-btn" onclick="setCT('deuteranomaly',this)">
+          <span class="dot" style="background:#a3e635"></span><span data-ar="دوترانومالي" data-en="Deuteranomaly"></span>
+        </button>
+        <button class="cg-btn" onclick="setCT('achromatopsia',this)">
+          <span class="dot" style="background:#9ca3af"></span><span data-ar="عمى كامل" data-en="Achromatopsia"></span>
+        </button>
+      </div>
+      <div class="sev-row" id="sevRow">
+        <span class="sev-lbl" data-ar="درجة الشدة" data-en="Severity"></span>
+        <input type="range" class="sev-sl" id="sevSl" min="0" max="1" step="0.01" value="1" oninput="onSev()">
+        <span class="sev-val" id="sevVal">100%</span>
+      </div>
+      <div class="sci">
+        <h5 data-ar="🔬 الأساس العلمي" data-en="🔬 Scientific Basis"></h5>
+        <p id="sciDesc">—</p>
+        <small id="sciRef"></small>
+      </div>
+      <div class="irow">
+        <div class="ic">
+          <h5 data-ar="📊 الانتشار" data-en="📊 Prevalence"></h5>
+          <p id="iP">—</p>
+          <div class="sbar"><div class="sfill" id="iBar" style="width:0%"></div></div>
+        </div>
+        <div class="ic">
+          <h5 data-ar="🧬 الخلايا" data-en="🧬 Affected Cones"></h5>
+          <p id="iC">—</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISION controls -->
+    <div id="VC" style="display:none">
+      <div class="slabel" data-ar="👁️ الوصفة الطبية (Diopters)" data-en="👁️ Prescription (Diopters)"></div>
+      <div class="pgrid">
+        <div class="ec r">
+          <h4 data-ar="👁️ العين اليمنى (OD)" data-en="👁️ Right Eye (OD)"></h4>
+          <div class="ig">
+            <label data-ar="القوة — Sphere (D)" data-en="Sphere (D)"></label>
+            <input type="range" min="-15" max="8" step="0.25" value="0" id="rS" oninput="onRx()">
+            <div class="iv"><span>-15</span><strong id="rSv">0.00</strong><span>+8</span></div>
+          </div>
+          <div class="ig">
+            <label data-ar="الاعوجاج — Cylinder (D)" data-en="Cylinder (D)"></label>
+            <input type="range" min="-8" max="0" step="0.25" value="0" id="rC" oninput="onRx()">
+            <div class="iv"><span>-8</span><strong id="rCv">0.00</strong><span>0</span></div>
+          </div>
+        </div>
+        <div class="ec l">
+          <h4 data-ar="👁️ العين اليسرى (OS)" data-en="👁️ Left Eye (OS)"></h4>
+          <div class="ig">
+            <label data-ar="القوة — Sphere (D)" data-en="Sphere (D)"></label>
+            <input type="range" min="-15" max="8" step="0.25" value="0" id="lS" oninput="onRx()">
+            <div class="iv"><span>-15</span><strong id="lSv">0.00</strong><span>+8</span></div>
+          </div>
+          <div class="ig">
+            <label data-ar="الاعوجاج — Cylinder (D)" data-en="Cylinder (D)"></label>
+            <input type="range" min="-8" max="0" step="0.25" value="0" id="lC" oninput="onRx()">
+            <div class="iv"><span>-8</span><strong id="lCv">0.00</strong><span>0</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="psf">
+        <h5 data-ar="🔬 نموذج PSF البصري" data-en="🔬 Optical PSF Model"></h5>
+        <p id="psfInfo">SE = Sphere + Cyl/2. σ = √|SE|×2.1 — Atchison & Smith 2000.</p>
+      </div>
+    </div>
+    <button class="abtn" id="abtn" onclick="startCam()"></button>
+  </div>
+</div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════ LANGUAGE SYSTEM ═══════════════ */
+let lang = 'ar';
+
+const T = {
+  ar: {
+    startCam:   '📷 تشغيل الكاميرا',
+    stopCam:    '⏹️ إيقاف الكاميرا',
+    severity:   'شدة',
+    malesOf:    'من الذكور',
+    sciTitle:   '🔬 الأساس العلمي',
+    normalVision:'رؤية طبيعية',
+    enterRx:    'أدخل الوصفة',
+    titleColor: '🎨 عمى الألوان',
+    titleVision:'👁️ ضعف النظر',
+    psfDefault: 'SE = Sphere + Cyl/2. σ = √|SE|×2.1 — Atchison & Smith 2000.',
+    langLabel:  'EN',
+    typeNames: {
+      protanopia:'بروتانوبيا', deuteranopia:'دوترانوبيا', tritanopia:'ترايتانوبيا',
+      protanomaly:'بروتانومالي', deuteranomaly:'دوترانومالي', achromatopsia:'عمى كامل'
+    },
+    sci: {
+      protanopia:   {desc:'غياب كامل لـ L-cones. الأحمر يبدو رمادياً أو زيتونياً. confusion lines في فضاء LMS.',cone:'L-cones مفقودة'},
+      deuteranopia: {desc:'غياب M-cones — 1 من 12 ذكر. الأخضر والأحمر غير قابلَين للتمييز.',cone:'M-cones مفقودة'},
+      tritanopia:   {desc:'غياب S-cones نادر. الأزرق يبدو أخضر. خوارزمية Brettel 1997 للدقة.',cone:'S-cones مفقودة'},
+      protanomaly:  {desc:'L-cones موجودة لكن طيفها منزاح. يُحاكى بشدة 75% من بروتانوبيا.',cone:'L-cones منزاحة'},
+      deuteranomaly:{desc:'الأكثر شيوعاً مطلقاً. M-cones منزاحة نحو L. يُخلط بين الأحمر والأخضر.',cone:'M-cones منزاحة'},
+      achromatopsia:{desc:'غياب جميع الـ cones. إبصار عبر العصي فقط. رمادي كامل + photophobia.',cone:'كل الـ cones'},
+    }
+  },
+  en: {
+    startCam:   '📷 Start Camera',
+    stopCam:    '⏹️ Stop Camera',
+    severity:   'Severity',
+    malesOf:    'of males',
+    sciTitle:   '🔬 Scientific Basis',
+    normalVision:'Normal Vision',
+    enterRx:    'Enter prescription',
+    titleColor: '🎨 Color Blindness',
+    titleVision:'👁️ Vision Impairment',
+    psfDefault: 'SE = Sphere + Cyl/2. σ = √|SE|×2.1 — Atchison & Smith 2000.',
+    langLabel:  'عربي',
+    typeNames: {
+      protanopia:'Protanopia', deuteranopia:'Deuteranopia', tritanopia:'Tritanopia',
+      protanomaly:'Protanomaly', deuteranomaly:'Deuteranomaly', achromatopsia:'Achromatopsia'
+    },
+    sci: {
+      protanopia:   {desc:'Complete absence of L-cones. Red appears gray or olive. Colors projected onto confusion lines in LMS space.',cone:'L-cones missing'},
+      deuteranopia: {desc:'Absent M-cones — affects 1 in 12 males. Red and green are indistinguishable. Most common CVD.',cone:'M-cones missing'},
+      tritanopia:   {desc:'Rare absence of S-cones. Blue appears green. Uses Brettel 1997 two-plane algorithm for accuracy.',cone:'S-cones missing'},
+      protanomaly:  {desc:'L-cones present but with shifted spectral sensitivity. Simulated at 75% severity of protanopia.',cone:'L-cones shifted'},
+      deuteranomaly:{desc:'Most common CVD overall. M-cones shifted toward L. Partial red-green confusion.',cone:'M-cones shifted'},
+      achromatopsia:{desc:'All cones absent. Vision only via rods. Complete grayscale + severe photophobia + low acuity.',cone:'All cones missing'},
+    }
+  }
+};
+
+function applyLang(){
+  const isAr = lang === 'ar';
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = isAr ? 'rtl' : 'ltr';
+  document.body.classList.toggle('en', !isAr);
+
+  // Update all data-ar / data-en elements
+  document.querySelectorAll('[data-ar]').forEach(el => {
+    const val = isAr ? el.dataset.ar : el.dataset.en;
+    if(el.tagName === 'INPUT' || el.tagName === 'BUTTON') el.value = val;
+    else el.textContent = val;
+  });
+
+  // Lang toggle label
+  document.getElementById('langLabel').textContent = T[lang].langLabel;
+
+  // Action button
+  const abtn = document.getElementById('abtn');
+  abtn.textContent = stream ? T[lang].stopCam : T[lang].startCam;
+
+  // Severity HUD
+  document.getElementById('hSev').textContent = T[lang].severity + ' ' + (severity*100|0) + '%';
+
+  // Refresh active type UI
+  if(colorType) {
+    const s = T[lang].sci[colorType] || {};
+    document.getElementById('sciDesc').textContent = s.desc || '—';
+    document.getElementById('iC').textContent = s.cone || '—';
+    document.getElementById('hLbl').textContent = T[lang].typeNames[colorType] || colorType;
+    const pEl = document.getElementById('iP');
+    if(pEl.dataset.pct) pEl.textContent = pEl.dataset.pct + ' ' + T[lang].malesOf;
+  }
+
+  // PSF info
+  onRx();
+}
+
+function toggleLang(){
+  lang = lang === 'ar' ? 'en' : 'ar';
+  applyLang();
+}
+
+/* ═══════════════ WEBGL ═══════════════ */
+const VERT=`attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;gl_Position=vec4(p,0,1);}`;
+const FRAG_CVD=`precision mediump float;varying vec2 v;uniform sampler2D T;uniform mat3 M;uniform int mode;
+float lin(float c){return c<=.04045?c/12.92:pow((c+.055)/1.055,2.4);}
+float gam(float c){c=clamp(c,0.,1.);return c<=.0031308?12.92*c:1.055*pow(c,1./2.4)-.055;}
+void main(){vec4 p=texture2D(T,vec2(v.x,1.-v.y));if(mode==0){gl_FragColor=p;return;}
+vec3 l=vec3(lin(p.r),lin(p.g),lin(p.b));vec3 o=M*l;gl_FragColor=vec4(gam(o.r),gam(o.g),gam(o.b),p.a);}`;
+const FRAG_BH=`precision mediump float;varying vec2 v;uniform sampler2D T;uniform float sig;uniform vec2 sz;
+void main(){if(sig<.3){gl_FragColor=texture2D(T,vec2(v.x,1.-v.y));return;}
+vec4 a=vec4(0.);float w=0.,is2=1./(2.*sig*sig),dx=1./sz.x;
+for(int i=-8;i<=8;i++){float f=float(i),wt=exp(-f*f*is2);a+=texture2D(T,vec2(v.x+f*dx,1.-v.y))*wt;w+=wt;}gl_FragColor=a/w;}`;
+const FRAG_BV=`precision mediump float;varying vec2 v;uniform sampler2D T;uniform float sig;uniform vec2 sz;
+void main(){if(sig<.3){gl_FragColor=texture2D(T,vec2(v.x,1.-v.y));return;}
+vec4 a=vec4(0.);float w=0.,is2=1./(2.*sig*sig),dy=1./sz.y;
+for(int i=-8;i<=8;i++){float f=float(i),wt=exp(-f*f*is2);a+=texture2D(T,vec2(v.x,1.-v.y+f*dy))*wt;w+=wt;}gl_FragColor=a/w;}`;
+const FRAG_AST=`precision mediump float;varying vec2 v;uniform sampler2D T;uniform float str;uniform vec2 sz;
+void main(){float s=str/sz.x;vec4 c=texture2D(T,vec2(v.x,1.-v.y));
+vec4 a=texture2D(T,vec2(v.x+s,1.-v.y)),b=texture2D(T,vec2(v.x-s,1.-v.y));gl_FragColor=c*.5+(a+b)*.25;}`;
+
+const R2L=[.4002,.7076,-.0808,-.2263,1.1653,.0457,0,0,.9182];
+const L2R=[1.8599,-1.1294,.2199,.3612,.6388,-.000006,0,0,1.089];
+const CVD_LMS={
+  protanopia:  [0,2.02344,-2.52581,0,1,0,0,0,1],
+  deuteranopia:[1,0,0,.494207,0,1.24827,0,0,1],
+  tritanopia:  [1,0,0,0,1,0,-.395913,.801109,0],
+};
+const PREVALENCE={protanopia:'1%',deuteranopia:'6%',tritanopia:'0.1%',protanomaly:'1%',deuteranomaly:'5%',achromatopsia:'0.003%'};
+const PREV_F={protanopia:10,deuteranopia:60,tritanopia:1,protanomaly:10,deuteranomaly:50,achromatopsia:.1};
+
+function m3mul(A,B){const C=new Array(9);for(let r=0;r<3;r++)for(let c=0;c<3;c++){let s=0;for(let k=0;k<3;k++)s+=A[r*3+k]*B[k*3+c];C[r*3+c]=s;}return C;}
+function lerp9(A,B,t){return A.map((v,i)=>v*(1-t)+B[i]*t);}
+const ID=[1,0,0,0,1,0,0,0,1];
+
+function buildMat(type,sev){
+  if(type==='normal') return ID;
+  let base=type,s=sev;
+  if(type==='protanomaly'){base='protanopia';s=sev*.75;}
+  if(type==='deuteranomaly'){base='deuteranopia';s=sev*.75;}
+  let lms;
+  if(type==='achromatopsia'){
+    const lw=[.2126,.7152,.0722];
+    lms=lerp9(ID,[lw[0],lw[1],lw[2],lw[0],lw[1],lw[2],lw[0],lw[1],lw[2]],s);
+  } else {
+    lms=lerp9(ID,CVD_LMS[base]||ID,s);
+  }
+  return m3mul(L2R,m3mul(lms,R2L));
+}
+
+let gl=null,glReady=false;
+let pCVD=null,pBH=null,pBV=null,pAST=null;
+let vbo=null,tSrc=null,fb0=null,fb1=null;
+let cW=0,cH=0,curMat=null;
+let blurS=0,astigP=0;
+let fpsN=0,fpsT=performance.now();
+let stream=null,raf=null,upImg=null;
+let appMode='color',inputMode='camera',colorType='protanopia',severity=1;
+
+const vid=document.getElementById('vid'),glc=document.getElementById('glc');
+
+function sh(src,type){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+function lk(vs,fs){const p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,fs);gl.linkProgram(p);return p;}
+function mkTex(){
+  const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);
+  [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));
+  [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));
+  return t;
+}
+function mkFB(w,h){
+  const t=mkTex();gl.bindTexture(gl.TEXTURE_2D,t);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+  const f=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);return{t,f};
+}
+function initGL(){
+  gl=glc.getContext('webgl',{antialias:false,alpha:false,powerPreference:'high-performance'});
+  if(!gl) return false;
+  const vs=sh(VERT,gl.VERTEX_SHADER);
+  pCVD=lk(vs,sh(FRAG_CVD,gl.FRAGMENT_SHADER));
+  pBH =lk(vs,sh(FRAG_BH, gl.FRAGMENT_SHADER));
+  pBV =lk(vs,sh(FRAG_BV, gl.FRAGMENT_SHADER));
+  pAST=lk(vs,sh(FRAG_AST,gl.FRAGMENT_SHADER));
+  vbo=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  tSrc=mkTex();glReady=true;return true;
+}
+function ensureSz(w,h){
+  if(w===cW&&h===cH) return;
+  glc.width=w;glc.height=h;
+  if(fb0){gl.deleteTexture(fb0.t);gl.deleteFramebuffer(fb0.f);}
+  if(fb1){gl.deleteTexture(fb1.t);gl.deleteFramebuffer(fb1.f);}
+  fb0=mkFB(w,h);fb1=mkFB(w,h);cW=w;cH=h;
+}
+function quad(p,tex,fb){
+  gl.bindFramebuffer(gl.FRAMEBUFFER,fb||null);
+  gl.viewport(0,0,cW,cH);gl.useProgram(p);
+  gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+  const a=gl.getAttribLocation(p,'p');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.uniform1i(gl.getUniformLocation(p,'T'),0);
+}
+function gpuRender(src){
+  if(!glReady) return;
+  const w=src.videoWidth||src.naturalWidth,h=src.videoHeight||src.naturalHeight;
+  if(!w||!h) return;
+  ensureSz(w,h);
+  gl.bindTexture(gl.TEXTURE_2D,tSrc);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,src);
+  if(appMode==='color'){
+    quad(pCVD,tSrc,null);
+    gl.uniform1i(gl.getUniformLocation(pCVD,'mode'),colorType==='normal'?0:1);
+    if(colorType!=='normal'&&curMat){
+      const m=curMat;
+      gl.uniformMatrix3fv(gl.getUniformLocation(pCVD,'M'),false,[m[0],m[3],m[6],m[1],m[4],m[7],m[2],m[5],m[8]]);
+    }
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  } else {
+    quad(pBH,tSrc,fb0.f);gl.uniform1f(gl.getUniformLocation(pBH,'sig'),blurS);gl.uniform2f(gl.getUniformLocation(pBH,'sz'),w,h);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    quad(pBV,fb0.t,fb1.f);gl.uniform1f(gl.getUniformLocation(pBV,'sig'),blurS);gl.uniform2f(gl.getUniformLocation(pBV,'sz'),w,h);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    quad(pAST,fb1.t,null);gl.uniform1f(gl.getUniformLocation(pAST,'str'),astigP);gl.uniform2f(gl.getUniformLocation(pAST,'sz'),w,h);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+}
+function loop(ts){
+  fpsN++;
+  if(ts-fpsT>=1000){document.getElementById('hFps').textContent=fpsN+' fps';fpsN=0;fpsT=ts;}
+  if(vid.readyState>=2) gpuRender(vid);
+  raf=requestAnimationFrame(loop);
+}
+
+/* ─── Controls ─── */
+function setCT(t,btn){
+  colorType=t;
+  document.querySelectorAll('.cg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  curMat=buildMat(t,severity);
+  const s=T[lang].sci[t]||{};
+  const name=T[lang].typeNames[t]||t;
+  document.getElementById('hLbl').textContent=name;
+  document.getElementById('hAlgo').style.display='block';
+  document.getElementById('hSev').textContent=T[lang].severity+' '+(severity*100|0)+'%';
+  document.getElementById('hSev').style.display='block';
+  const pct=PREVALENCE[t]||'—';
+  const pEl=document.getElementById('iP');
+  pEl.textContent=pct+' '+T[lang].malesOf;
+  pEl.dataset.pct=pct;
+  document.getElementById('iBar').style.width=(PREV_F[t]||0)+'%';
+  document.getElementById('iC').textContent=s.cone||'—';
+  document.getElementById('sciDesc').textContent=s.desc||'—';
+  document.getElementById('sciRef').textContent='📖 Machado, Oliveira & Fernandes — IEEE TVCG 2009';
+  document.getElementById('sevRow').style.display=t==='achromatopsia'?'none':'flex';
+  if(inputMode==='image'&&upImg) gpuRender(upImg);
+}
+function onSev(){
+  severity=parseFloat(document.getElementById('sevSl').value);
+  document.getElementById('sevVal').textContent=(severity*100|0)+'%';
+  document.getElementById('hSev').textContent=T[lang].severity+' '+(severity*100|0)+'%';
+  curMat=buildMat(colorType,severity);
+  if(inputMode==='image'&&upImg) gpuRender(upImg);
+}
+function onRx(){
+  const rS=+document.getElementById('rS').value, rC=+document.getElementById('rC').value;
+  const lS=+document.getElementById('lS').value, lC=+document.getElementById('lC').value;
+  const fmt=v=>(v>=0?'+':'')+v.toFixed(2);
+  document.getElementById('rSv').textContent=fmt(rS);
+  document.getElementById('rCv').textContent=fmt(rC);
+  document.getElementById('lSv').textContent=fmt(lS);
+  document.getElementById('lCv').textContent=fmt(lC);
+  const rSE=rS+rC/2, lSE=lS+lC/2;
+  const dSE=Math.abs(rSE)>=Math.abs(lSE)?rSE:lSE;
+  const dC=Math.abs(rC)>=Math.abs(lC)?rC:lC;
+  blurS=Math.min(Math.pow(Math.abs(dSE),.5)*2.1,22);
+  astigP=Math.min(Math.abs(dC)*1.8,16);
+  const nc=rS===0&&rC===0&&lS===0&&lC===0;
+  document.getElementById('psfInfo').textContent=nc
+    ? T[lang].psfDefault
+    : `OD SE=${fmt(rSE)}D  OS SE=${fmt(lSE)}D → σ=${blurS.toFixed(2)}px${astigP>.2?' | astig='+astigP.toFixed(2)+'px':''}`;
+  document.getElementById('hLbl').textContent=nc?T[lang].normalVision:`SE ${fmt(dSE)}D`;
+  if(inputMode==='image'&&upImg) gpuRender(upImg);
+}
+function onImgLoad(e){
+  const f=e.target.files[0];if(!f) return;
+  if(!glReady) initGL();
+  const img=new Image();
+  img.onload=()=>{upImg=img;document.getElementById('ph').style.display='none';gpuRender(img);};
+  img.src=URL.createObjectURL(f);
+}
+function setIM(m,btn){
+  inputMode=m;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  if(m==='camera'){
+    document.getElementById('uploadSec').style.display='none';
+    document.getElementById('abtn').style.display='block';
+    stopCam();upImg=null;
+    document.getElementById('abtn').textContent=T[lang].startCam;
+    document.getElementById('abtn').onclick=startCam;
+  } else {
+    document.getElementById('uploadSec').style.display='block';
+    document.getElementById('abtn').style.display='none';
+    ['hFps','hGpu'].forEach(id=>document.getElementById(id).style.display='none');
+    stopCam();
+    if(gl){gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clear(gl.COLOR_BUFFER_BIT);}
+    document.getElementById('ph').style.display='flex';
+  }
+}
+async function startCam(){
+  if(!glReady&&!initGL()){alert('WebGL not supported.');return;}
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60,max:60}},
+      audio:false
+    });
+    vid.srcObject=stream;await vid.play();
+    document.getElementById('ph').style.display='none';
+    document.getElementById('hFps').style.display='block';
+    document.getElementById('hGpu').style.display='block';
+    if(appMode==='color'){document.getElementById('hAlgo').style.display='block';document.getElementById('hSev').style.display='block';}
+    const btn=document.getElementById('abtn');
+    btn.textContent=T[lang].stopCam;btn.onclick=stopCam;
+    fpsN=0;fpsT=performance.now();raf=requestAnimationFrame(loop);
+  }catch(e){
+    alert(lang==='ar'?'تعذّر الوصول للكاميرا.':'Could not access camera.');
+  }
+}
+function stopCam(){
+  if(raf){cancelAnimationFrame(raf);raf=null;}
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  vid.srcObject=null;
+  if(gl){gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);}
+  document.getElementById('ph').style.display='flex';
+  ['hFps','hGpu','hAlgo','hSev'].forEach(id=>document.getElementById(id).style.display='none');
+  const btn=document.getElementById('abtn');
+  btn.textContent=T[lang].startCam;btn.onclick=startCam;
+}
+
+/* ─── Navigation ─── */
+function goApp(m){
+  appMode=m;
+  document.getElementById('W').classList.remove('active');
+  document.getElementById('A').classList.add('active');
+  if(!glReady) initGL();
+  if(m==='color'){
+    document.getElementById('appTitle').textContent=T[lang].titleColor;
+    document.getElementById('CC').style.display='block';
+    document.getElementById('VC').style.display='none';
+    setCT('protanopia',document.querySelector('.cg-btn'));
+  } else {
+    document.getElementById('appTitle').textContent=T[lang].titleVision;
+    document.getElementById('CC').style.display='none';
+    document.getElementById('VC').style.display='block';
+    document.getElementById('hLbl').textContent=T[lang].enterRx;
+    onRx();
+  }
+}
+function goBack(){
+  stopCam();upImg=null;
+  ['hFps','hGpu','hAlgo','hSev'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('ph').style.display='flex';
+  document.getElementById('abtn').textContent=T[lang].startCam;
+  document.getElementById('abtn').onclick=startCam;
+  document.getElementById('abtn').style.display='block';
+  document.getElementById('uploadSec').style.display='none';
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  inputMode='camera';
+  document.getElementById('A').classList.remove('active');
+  document.getElementById('W').classList.add('active');
+}
+
+/* ─── Init ─── */
+applyLang();
+setCT('protanopia',document.querySelector('.cg-btn'));
+document.getElementById('abtn').textContent=T[lang].startCam;
+</script>
+</body>
+</html>

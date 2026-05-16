@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -74,7 +76,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .btn-back:hover{color:var(--text);border-color:var(--a)}
 .app-title{font-size:1.15rem;font-weight:700;
   background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.15rem;margin-bottom:.8rem;box-shadow:0 4px 24px rgba(0,0,0,.35)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.15rem;margin-bottom:.8rem;box-shadow:0 4px 24px rgba(0,0,0,.35);position:relative;}
 
 /* ── VIEWPORT — exact same as working version ── */
 .vp{
@@ -222,7 +224,8 @@ body.en .dot{margin-left:0;margin-right:3px}
 .abtn{width:100%;padding:.82rem;border-radius:12px;border:none;
   background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;
   font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;
-  transition:all .3s;box-shadow:0 4px 20px rgba(124,106,247,.3)}
+  transition:all .3s;box-shadow:0 4px 20px rgba(124,106,247,.3);
+}
 .abtn:hover,.abtn:active{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,106,247,.45)}
 
 /* ── ANIMATIONS ── */
@@ -283,6 +286,42 @@ body.en .dot{margin-left:0;margin-right:3px}
 
 /* Fullscreen body lock */
 body.fs-active{overflow:hidden}
+
+/* ── CAM BUTTON INSIDE VIEWPORT ── */
+.vp-cam-btn{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  padding:.75rem 1rem;
+  z-index:10;
+  background:linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 100%);
+  display:none; /* hidden when camera is active */
+}
+.vp.cam-idle .vp-cam-btn{display:block}
+.vp-abtn{
+  width:100%;padding:.72rem;border-radius:10px;border:none;
+  background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;
+  font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;
+  transition:all .3s;
+  box-shadow:0 4px 20px rgba(124,106,247,.4);
+  backdrop-filter:blur(4px);
+}
+.vp-abtn:hover,.vp-abtn:active{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,106,247,.55)}
+
+/* Stop button — top-right of viewport when active */
+.vp-stop-btn{
+  position:absolute;top:9px;left:9px;z-index:10;
+  background:rgba(247,106,138,.18);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(247,106,138,.4);
+  border-radius:8px;
+  padding:.28rem .75rem;
+  color:var(--a2);font-size:.7rem;font-weight:700;
+  cursor:pointer;display:none;
+  font-family:inherit;
+  transition:all .2s ease;
+}
+.vp-stop-btn:hover{background:rgba(247,106,138,.35)}
+.vp.cam-active .vp-stop-btn{display:block}
 </style>
 </head>
 <body>
@@ -333,6 +372,7 @@ body.fs-active{overflow:hidden}
         <div class="vp-ico">👁️</div>
         <span style="font-size:.82rem" data-ar="اضغط لتشغيل الكاميرا" data-en="Press to start camera"></span>
       </div>
+      <div class="vp-stop-btn" id="vpStopBtn" onclick="stopCam()"></div>
       <div class="hud-tr">
         <div class="chip w" id="hLbl">—</div>
         <div class="chip a" id="hAlgo" style="display:none">Machado 2009</div>
@@ -341,6 +381,10 @@ body.fs-active{overflow:hidden}
       <div class="hud-bl">
         <div class="chip g" id="hFps" style="display:none">— fps</div>
         <div class="chip g" id="hGpu" style="display:none">⚡ GPU</div>
+      </div>
+      <!-- Camera action button — always visible inside viewport -->
+      <div class="vp-cam-btn" id="vpCamBtnWrap">
+        <button class="abtn vp-abtn" id="abtn" onclick="startCam()"></button>
       </div>
       <!-- Viewport controls -->
       <div class="vp-controls">
@@ -469,7 +513,7 @@ body.fs-active{overflow:hidden}
       </div>
     </div>
 
-    <button class="abtn" id="abtn" onclick="startCam()"></button>
+    <!-- abtn moved into viewport -->
   </div>
 </div>
 </div>
@@ -541,6 +585,7 @@ function applyLang(){
   document.getElementById('logoText').textContent = T[lang].logoText;
   document.getElementById('langLabel').textContent = T[lang].langLabel;
   document.getElementById('abtn').textContent = stream ? T[lang].stopCam : T[lang].startCam;
+  document.getElementById('vpStopBtn').textContent = T[lang].stopCam;
   document.getElementById('hSev').textContent = T[lang].severity + ' ' + (severity*100|0) + '%';
 
   if(colorType){
@@ -600,14 +645,17 @@ function buildMat(type,sev){
   let base=type, s=sev;
   if(type==='protanomaly') {base='protanopia';   s=sev*.75;}
   if(type==='deuteranomaly'){base='deuteranopia'; s=sev*.75;}
-  let lms;
+
+  // Achromatopsia: direct luminance matrix in LINEAR RGB space (ITU-R BT.709)
+  // No HPE transform needed — apply grayscale directly
   if(type==='achromatopsia'){
     const lw=[.2126,.7152,.0722];
-    lms=lerp9(ID,[lw[0],lw[1],lw[2],lw[0],lw[1],lw[2],lw[0],lw[1],lw[2]],s);
-  } else {
-    lms=lerp9(ID,CVD_LMS[base]||ID,s);
+    const achro=[lw[0],lw[1],lw[2], lw[0],lw[1],lw[2], lw[0],lw[1],lw[2]];
+    return lerp9(ID, achro, s);
   }
-  return m3mul(L2R,m3mul(lms,R2L));
+
+  const lms = lerp9(ID, CVD_LMS[base]||ID, s);
+  return m3mul(L2R, m3mul(lms, R2L));
 }
 
 let gl=null, glReady=false;
@@ -828,8 +876,11 @@ async function startCam(){
       document.getElementById('hAlgo').style.display='block';
       document.getElementById('hSev').style.display='block';
     }
-    const btn=document.getElementById('abtn');
-    btn.textContent=T[lang].stopCam; btn.onclick=stopCam;
+    document.getElementById('abtn').textContent=T[lang].stopCam;
+    document.getElementById('abtn').onclick=stopCam;
+    document.getElementById('vpStopBtn').textContent=T[lang].stopCam;
+    document.querySelector('.vp').classList.remove('cam-idle');
+    document.querySelector('.vp').classList.add('cam-active');
     fpsN=0; fpsT=performance.now();
     raf=requestAnimationFrame(rafLoop);
   }catch(e){
@@ -844,8 +895,10 @@ function stopCam(){
   if(gl){gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);}
   document.getElementById('ph').style.display='flex';
   ['hFps','hGpu','hAlgo','hSev'].forEach(id=>document.getElementById(id).style.display='none');
-  const btn=document.getElementById('abtn');
-  btn.textContent=T[lang].startCam; btn.onclick=startCam;
+  document.getElementById('abtn').textContent=T[lang].startCam;
+  document.getElementById('abtn').onclick=startCam;
+  document.querySelector('.vp').classList.add('cam-idle');
+  document.querySelector('.vp').classList.remove('cam-active');
 }
 
 /* ══════════════════════════════════════
@@ -942,6 +995,7 @@ document.addEventListener('webkitfullscreenchange', ()=>{
 });
 
 /* ── Init ── */
+document.querySelector('.vp').classList.add('cam-idle');
 applyLang();
 setCT('protanopia',document.querySelector('.cg-btn'));
 document.getElementById('abtn').textContent=T[lang].startCam;

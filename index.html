@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
 <script defer src="/_vercel/speed-insights/script.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#07070d">
 <title>بصيرة — Basira</title>
@@ -238,6 +237,52 @@ body.en .dot{margin-left:0;margin-right:3px}
   .pgrid,.irow{grid-template-columns:1fr}
   .cg{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── VIEWPORT CONTROLS ── */
+.vp-controls{
+  position:absolute;bottom:9px;right:9px;display:flex;gap:.4rem;z-index:10;
+}
+.vp-btn{
+  background:rgba(5,5,12,.82);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.18);border-radius:8px;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:.9rem;transition:all .2s ease;color:var(--text);
+}
+.vp-btn:hover,.vp-btn:active{background:rgba(124,106,247,.35);border-color:var(--a)}
+.vp-btn.active{background:rgba(124,106,247,.4);border-color:var(--a)}
+
+/* Portrait mode */
+.vp.portrait{aspect-ratio:9/16 !important}
+
+/* Fullscreen overlay */
+.vp-fullscreen{
+  position:fixed !important;inset:0 !important;
+  width:100vw !important;height:100vh !important;
+  border-radius:0 !important;z-index:9999 !important;
+  aspect-ratio:unset !important;
+  background:#000;
+}
+.vp-fullscreen .vp-controls{bottom:20px;right:20px}
+.vp-fullscreen .hud-tr{top:20px;right:20px}
+.vp-fullscreen .hud-bl{bottom:20px;left:20px}
+.vp-fullscreen #vid,
+.vp-fullscreen #glc{
+  width:100% !important;height:100% !important;
+  object-fit:cover !important;
+}
+/* Close button in fullscreen */
+.vp-close{
+  position:absolute;top:20px;left:20px;z-index:10;
+  background:rgba(5,5,12,.82);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.18);border-radius:8px;
+  width:36px;height:36px;display:none;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1rem;color:var(--text);transition:all .2s;
+}
+.vp-fullscreen .vp-close{display:flex}
+.vp-close:hover{background:rgba(247,106,138,.35);border-color:var(--a2)}
+
+/* Fullscreen body lock */
+body.fs-active{overflow:hidden}
 </style>
 </head>
 <body>
@@ -297,6 +342,13 @@ body.en .dot{margin-left:0;margin-right:3px}
         <div class="chip g" id="hFps" style="display:none">— fps</div>
         <div class="chip g" id="hGpu" style="display:none">⚡ GPU</div>
       </div>
+      <!-- Viewport controls -->
+      <div class="vp-controls">
+        <div class="vp-btn" id="btnOrient" onclick="toggleOrientation()" title="Portrait / Landscape">⇅</div>
+        <div class="vp-btn" id="btnFS"     onclick="toggleFullscreen()"   title="Fullscreen">⛶</div>
+      </div>
+      <!-- Close fullscreen button -->
+      <div class="vp-close" id="btnClose" onclick="toggleFullscreen()">✕</div>
     </div>
 
     <!-- Tabs -->
@@ -831,6 +883,63 @@ function goBack(){
   document.getElementById('A').classList.remove('active');
   document.getElementById('W').classList.add('active');
 }
+
+
+/* ══════════════════════════════════════
+   VIEWPORT — Orientation + Fullscreen
+══════════════════════════════════════ */
+let isPortrait = false;
+let isFullscreen = false;
+
+function toggleOrientation(){
+  const vp = document.querySelector('.vp');
+  isPortrait = !isPortrait;
+  vp.classList.toggle('portrait', isPortrait);
+  document.getElementById('btnOrient').classList.toggle('active', isPortrait);
+  document.getElementById('btnOrient').textContent = isPortrait ? '⇄' : '⇅';
+  // Resize canvas to match new dimensions
+  cW = 0; cH = 0;
+}
+
+function toggleFullscreen(){
+  const vp = document.querySelector('.vp');
+  isFullscreen = !isFullscreen;
+  vp.classList.toggle('vp-fullscreen', isFullscreen);
+  document.body.classList.toggle('fs-active', isFullscreen);
+  document.getElementById('btnFS').textContent = isFullscreen ? '⛶' : '⛶';
+  document.getElementById('btnFS').classList.toggle('active', isFullscreen);
+  // Reset canvas size on toggle
+  cW = 0; cH = 0;
+
+  // Try native fullscreen API
+  if(isFullscreen){
+    if(vp.requestFullscreen) vp.requestFullscreen().catch(()=>{});
+    else if(vp.webkitRequestFullscreen) vp.webkitRequestFullscreen();
+  } else {
+    if(document.exitFullscreen && document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+    else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+}
+
+// Sync fullscreen state with browser ESC key
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && isFullscreen){
+    isFullscreen = false;
+    document.querySelector('.vp').classList.remove('vp-fullscreen');
+    document.body.classList.remove('fs-active');
+    document.getElementById('btnFS').classList.remove('active');
+    cW = 0; cH = 0;
+  }
+});
+document.addEventListener('webkitfullscreenchange', ()=>{
+  if(!document.webkitFullscreenElement && isFullscreen){
+    isFullscreen = false;
+    document.querySelector('.vp').classList.remove('vp-fullscreen');
+    document.body.classList.remove('fs-active');
+    document.getElementById('btnFS').classList.remove('active');
+    cW = 0; cH = 0;
+  }
+});
 
 /* ── Init ── */
 applyLang();
